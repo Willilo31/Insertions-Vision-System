@@ -1,5 +1,5 @@
 import customtkinter
-# import Jetson.GPIO as GPIO
+import Jetson.GPIO as GPIO
 import tkinter as tk
 from tkinter import ttk, messagebox
 from PIL import ImageTk, Image
@@ -15,16 +15,16 @@ PINRED = 12
 PINALARM = 13
 
 
-# GPIO.setmode(GPIO.BOARD)
-# GPIO.setwarnings(False)
-# GPIO.setup(PINGREEN, GPIO.OUT)
-# GPIO.setup(PINRED, GPIO.OUT)
-# GPIO.setup(PINALARM, GPIO.OUT)
+GPIO.setmode(GPIO.BOARD)
+GPIO.setwarnings(False)
+GPIO.setup(PINGREEN, GPIO.OUT)
+GPIO.setup(PINRED, GPIO.OUT)
+GPIO.setup(PINALARM, GPIO.OUT)
 
-# GPIO.output(PINGREEN, True)
-# GPIO.output(PINRED, True)
-# GPIO.output(PINALARM, True)
-# GPIO.cleanup()
+GPIO.output(PINGREEN, True)
+GPIO.output(PINRED, True)
+GPIO.output(PINALARM, True)
+GPIO.cleanup()
 
 global iniciado
 global order_value_label
