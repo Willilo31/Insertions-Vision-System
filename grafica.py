@@ -65,7 +65,7 @@ status_text = tk.StringVar()
     
 #     # Crear una nueva ventana emergente
 #     popup = tk.Toplevel(app)  # Asume que 'app' es tu ventana principal
-#     popup.overrideredirect(True)  # Oculta la barra de título de la ventana emergente
+#     popup.overrideredirect(TrueGPIO)  # Oculta la barra de título de la ventana emergente
 
 #     # Configurar el tamaño de fuente y otros estilos si es necesario
 #     msg_font = ("Arial", 24)

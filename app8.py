@@ -58,14 +58,13 @@ def set_camera_parameters():
 def main(order_number=None, callback=None):
     # args = parse_arguments()
     # frame_width, frame_height = args.webcam_resolution
-    cap = cv2.VideoCapture("Product1.webm")
+    cap = cv2.VideoCapture(0)
     # cap.set(cv2.CAP_PROP_FRAME_WIDTH, frame_width)
     # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_height) 
 
 
     # set_camera_parameters()
     update_table_event = threading.Event()
-
     model = YOLO("insertionsM01.pt")
     
     class_names = ['Lewer-G', 'Lewer-NG', 'Ysite-G', 'Ysite-NG']
@@ -90,11 +89,11 @@ def main(order_number=None, callback=None):
 
     while True:
         ret, frame = cap.read()
-        height, width, _ = frame.shape
-        
+                
         if not ret:
             continue
 
+        height, width, _ = frame.shape
         results = model.track(frame, persist=True, verbose=None, agnostic_nms=True)
 
         if results[0].boxes.id is not None:
