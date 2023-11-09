@@ -151,7 +151,7 @@ def main(order_number=None, callback=None):
                         prediction = np.argmax(np.bincount(vector.flatten()))
                         print(class_names[prediction])
                         if prediction == 1 or prediction == 3:
-                            # GPIO.cleanup()
+                            GPIO.cleanup()
                             subprocess.Popen(["python3", "RedLight.py"])
                             file_path = os.path.join('historial de inserciones', f"{order_number}.csv")
                             df = pd.read_csv(file_path)

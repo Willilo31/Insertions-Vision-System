@@ -44,11 +44,6 @@ app.geometry("1000x700")
 #app.attributes('-fullscreen', 'True')
 app.title("Bad Insertions Verification")
 
-# image = Image.open('Logo Baxter-01.png')
-# image_tk = ImageTk.PhotoImage(image)
-# label = tk.Label(app, image=image_tk)
-# label.pack()
-
 custom_font = customtkinter.CTkFont(family='Verdana', size=28)
 
 # Crear campos de texto para mostrar los datos
@@ -59,126 +54,15 @@ date_text = tk.StringVar()
 turno_text = tk.StringVar()
 status_text = tk.StringVar()
 
-
-# # A que se debe este error que me esta saliendo y como puedo solucionarlo 
-# def show_notification(message, duration=3000):  # 3000 milisegundos = 3 segundos
-    
-#     # Crear una nueva ventana emergente
-#     popup = tk.Toplevel(app)  # Asume que 'app' es tu ventana principal
-#     popup.overrideredirect(TrueGPIO)  # Oculta la barra de título de la ventana emergente
-
-#     # Configurar el tamaño de fuente y otros estilos si es necesario
-#     msg_font = ("Arial", 24)
-#     popup.configure(bg="white")
-
-#     # Añadir un mensaje a la ventana emergente
-#     msg_label = tk.Label(popup, text=message, font=msg_font, bg="white")
-#     msg_label.pack(pady=20, padx=20)
-
-#     # Actualiza el tamaño de 'popup' para que se ajuste al contenido
-#     popup.update_idletasks()
-
-#     # Posición inicial (parte superior fuera de la vista)
-#     x = app.winfo_x() + (app.winfo_width() // 2) - (popup.winfo_width() // 2)
-#     y = app.winfo_y() - popup.winfo_height()
-#     popup.geometry("+%d+%d" % (x, y))
-
-#     # Define la animación de aparición
-#     target_y = app.winfo_y()  # Posición final en y
-#     delta_y = (target_y - y + 100) // 10  # Desplazamiento por fotograma
-
-#     def animate_appear():
-#         nonlocal y
-#         if y < target_y:
-#             y += delta_y
-#             popup.geometry("+%d+%d" % (x, y))
-#             popup.after(10, animate_appear)
-#         else:
-#             # Establecer un temporizador para iniciar la animación de desaparición después de 'duration' milisegundos
-#             popup.after(duration, animate_disappear)
-
-#     # Define la animación de desaparición
-#     def animate_disappear():
-#         nonlocal y
-#         if y > (app.winfo_y() - popup.winfo_height()):
-#             y -= delta_y
-#             popup.geometry("+%d+%d" % (x, y))
-#             popup.after(10, animate_disappear)
-#         else:
-#             popup.destroy()
-
-#     # Aquí, en lugar de usar `popup.after(10, animate_appear)`, utilizamos `popup.after_idle(animate_appear)`
-#     # Esto asegura que la animación comience solo después de que todos los otros eventos pendientes (como dibujar la ventana) estén completos.
-#     popup.after(1, animate_appear)
-
-
 def start_program():
-    global selected_Order 
-    global iniciado
-    global order_value_label
-    global pause
-
-    if not selected_Order.get():
-        # show_notification("Seleccione el número de orden")
-        return
-
-    if iniciado == 0:
-        if not os.path.exists('historial de inserciones'):
-            os.mkdir('historial de inserciones')
-
-        # Crear el archivo CSV con el nombre del número de orden
-        file_path = os.path.join('historial de inserciones', f"{selected_Order.get()}.csv")
-
-        # Si el archivo no existe, crea uno con los encabezados
-        if not os.path.exists(file_path):
-            with open(file_path, 'w') as file:
-                file.write('Item,Model,Defect Type,Time,Date\n')
-        thread = threading.Thread(target=main, args=(selected_Order.get(), insert_table,), daemon=True)
-        thread.start()
-        iniciado = 1
-        pause = 0
-        order_value_label.config(state=tk.DISABLED)
-        variable.STOPSYSTEM[0] = 0
-    else:
-        pass
-        # show_notification("El programa ya ha iniciado")
+    pass
 
 def stop_program():
-    global iniciado
-    global pause
-
-    if pause == 1:
-        # show_notification("La orden ya esta pausada")
-        pass
-
-    if iniciado == 1:
-        pause = 1
-        variable.STOPSYSTEM[0] = 1
-    elif iniciado == 0 and pause == 0:
-        pass
-        # show_notification("No se puede pausar la orden sin haber iniciado")  
-    iniciado = 0
+    pass
 
 def complete_program():
-    global pause
-    global iniciado
-    global order_value_label
-    global view_camera_state
+    pass
 
-    if iniciado == 1 or pause == 1:
-        stop_program()
-        order_value_label.config(state=tk.NORMAL)
-        # show_notification("El sistema ha finalizado con exito")
-        selected_Order.set('')
-        iniciado = 0
-        pause = 0
-    
-    else:
-        pass
-        # show_notification("No se puede completar la orden sin haber iniciado")
-camera_state = "Camera One"
-
-# Esta función cambiará el texto del botón entre "Camera One", "Camera Two" y "Both Cameras" en el orden especificado.
 def toggle_camera_text():
     global camera_state
     if camera_state == "Camera One":
@@ -195,24 +79,15 @@ view_camera_state = "View Camera OFF"
 
 def view_camera():
     global view_camera_state
-    global iniciado
 
-    if iniciado == 1:
-        if view_camera_state == "View Camera OFF":
-            ViewCameraBtn.configure(text="View Camera ON")
-            view_camera_state = "View Camera ON"
-            variable.VIEWCAMARA[0] = 1
-        else:
-            ViewCameraBtn.configure(text="View Camera OFF")
-            view_camera_state = "View Camera OFF"
-            variable.VIEWCAMARA[0] = 0
-
+    if view_camera_state == "View Camera OFF":
+        ViewCameraBtn.configure(text="View Camera ON")
+        view_camera_state = "View Camera ON"
+        variable.VIEWCAMARA[0] = 1
     else:
-        pass
-        # show_notification("Primero inicia el sistema")
-
-table = None
-table_frame = ttk.Frame(app)
+        ViewCameraBtn.configure(text="View Camera OFF")
+        view_camera_state = "View Camera OFF"
+        variable.VIEWCAMARA[0] = 0
 
 def insert_table():
     global id_seleccionado
@@ -251,14 +126,12 @@ def insert_table():
     
     try:
         df1 = pd.read_csv(file_path)
-        #print(df1)  # <-- Imprimir el contenido del DataFrame
 
         if not df1.empty:
             for _, row in df1.iterrows():
-                #print(f"Agregando fila: {row.tolist()}")  # Debugging
                 add_row(row['Item'], row['Model'], row['Defect Type'], row['Time'], row['Date'])
         else:
-            print("El archivo está vacío o no contiene datos.")
+            pass
     except FileNotFoundError:
         pass  
 
@@ -279,7 +152,6 @@ def shutdown_system():
             return
     else:
         pass
-        # show_notification("Primero complete la orden")
 
 def header():
     global order_value_label
@@ -387,6 +259,8 @@ shutdown_button = tk.Button(
     bg='black'  # puedes ajustar el color de fondo según tus necesidades
 )
 
+table = None
+table_frame = ttk.Frame(app)
 
 # Posicionar el botón en la esquina superior derecha
 shutdown_button.place(relx=0.97, rely=0.03, anchor=tk.NE)
