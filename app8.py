@@ -9,16 +9,14 @@ import pandas as pd
 import threading
 from PIL import Image, ImageDraw, ImageFont
 import argparse
-import Jetson.GPIO as GPIO
 import variable
 
-PINGREEN = 11
+subprocess.Popen(["python3", "GPIO_Start.py"])
 
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="YOLOv8 live")
-    parser.add_argument("--webcam-resolution", default=[1280, 720], nargs=2, type=int)
+    parser.add_argument("--webcam-resolution", default=[1024, 768], nargs=2, type=int) #[1024, 768]
     return parser.parse_args()
-
 
 def write_to_csv(order_number, item, model, defect_type, time_val, date_val):
     file_path = os.path.join('historial de inserciones', f"{order_number}.csv")
@@ -46,29 +44,32 @@ def save_image_with_timestamp(frame, folder_path, item_number):
     # Guardar la imagen con el nombre de item_number
     image.save(os.path.join(folder_path, f"{item_number}.png"))
 
-def set_camera_parameters():
-    commands = [
-        "v4l2-ctl -d /dev/video0 -c focus_auto=0",
-        "v4l2-ctl -d /dev/video0 -c focus_absolute=20",
-        "v4l2-ctl -d /dev/video0 -c zoom_absolute=100",
-    ]
-    for command in commands:
-        subprocess.run(command, shell=True)
+# def set_camera_parameters():
+#     commands = [
+#         "v4l2-ctl -d /dev/video0 -c focus_auto=0",
+#         "v4l2-ctl -d /dev/video0 -c focus_absolute=20",
+#         "v4l2-ctl -d /dev/video0 -c zoom_absolute=100",
+#     ]
+#     for command in commands:
+#         subprocess.run(command, shell=True)
 
 def main(order_number=None, callback=None):
-    # args = parse_arguments()
-    # frame_width, frame_height = args.webcam_resolution
+    args = parse_arguments()
+    frame_width, frame_height = args.webcam_resolution
+
     cap = cv2.VideoCapture(0)
-    # cap.set(cv2.CAP_PROP_FRAME_WIDTH, frame_width)
-    # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_height) 
+    
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, frame_width)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_height) 
 
 
     # set_camera_parameters()
     update_table_event = threading.Event()
+
     model = YOLO("insertionsM01.pt")
     
     class_names = ['Lewer-G', 'Lewer-NG', 'Ysite-G', 'Ysite-NG']
-    class_names2 = ['Lower', 'Lower', 'Y-site', 'Y-site']
+    class_names2 = ['Lewer', 'Lewer', 'Ysite', 'Ysite']
 
     line_distance_up = 75
     line_distance_down = 125
@@ -81,25 +82,22 @@ def main(order_number=None, callback=None):
     prediction = 0
     insertions = ''
     fps = 0.0
-    GPIO.setmode(GPIO.BOARD)
-    GPIO.setwarnings(False)
-    GPIO.setup(PINGREEN, GPIO.OUT)
-    GPIO.output(PINGREEN, False)
-    GPIO.cleanup()
-
     while True:
         ret, frame = cap.read()
-                
+        height, width, _ = frame.shape
+        
         if not ret:
             continue
 
-        height, width, _ = frame.shape
-        results = model.track(frame, persist=True, verbose=None, agnostic_nms=True)
+        results = model.track(frame, persist=True, verbose=False, agnostic_nms=True, half=False, imgsz = 640, device=0) #device=0
 
         if results[0].boxes.id is not None:
             boxes = results[0].boxes.xyxy.cpu().numpy().astype(int)
             class_ids = results[0].boxes.cls.cpu().numpy().astype(int)
             ids = results[0].boxes.id.cpu().numpy().astype(int)
+            # boxes = results[0].boxes.xyxy.cuda.numpy().astype(int)
+            # class_ids = results[0].boxes.cls.cuda.numpy().astype(int)
+            # ids = results[0].boxes.id.cuda.numpy().astype(int)
 
             for box, id, class_id in zip(boxes, ids, class_ids):
                 #print(box, id, class_id)
@@ -151,8 +149,9 @@ def main(order_number=None, callback=None):
                         prediction = np.argmax(np.bincount(vector.flatten()))
                         print(class_names[prediction])
                         if prediction == 1 or prediction == 3:
-                            GPIO.cleanup()
-                            subprocess.Popen(["python3", "RedLight.py"])
+
+                            subprocess.Popen(["python3", "GPIO_Wrong.py"])
+
                             file_path = os.path.join('historial de inserciones', f"{order_number}.csv")
                             df = pd.read_csv(file_path)
                             
@@ -183,7 +182,6 @@ def main(order_number=None, callback=None):
                             if callback:
                                 callback()
                     data_matrix = np.delete(data_matrix, row_to_analyze, axis=0)
-
         #Fps
         frame_count += 1
         elapsed_time = time.time() - start_time
@@ -197,9 +195,9 @@ def main(order_number=None, callback=None):
         cv2.line(frame, (0, height - line_distance_down), (width, height - line_distance_down), (0, 0, 255), 2)
         
         if variable.VIEWCAMARA[0] == 1:
-            cv2.namedWindow('frame', cv2.WINDOW_NORMAL)
+            cv2.namedWindow('Bad Insertions Vision System', cv2.WINDOW_NORMAL)
             # cv2.resizeWindow('frame', 450,450)
-            cv2.imshow("frame", frame)
+            cv2.imshow('Bad Insertions Vision System', frame)
 
         if variable.VIEWCAMARA[0] == 0:
             cv2.destroyAllWindows()
@@ -207,14 +205,10 @@ def main(order_number=None, callback=None):
         if (cv2.waitKey(30) == 27 or variable.STOPSYSTEM[0] == 1):
             cv2.destroyAllWindows()
             break
-
-    GPIO.setwarnings(False)
-    GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(PINGREEN, GPIO.OUT)
-    GPIO.output(PINGREEN, True)
     cap.release()
     cv2.destroyAllWindows()
-    GPIO.cleanup()
 
 if __name__ == "__main__":
     main()
+
+
